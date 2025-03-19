@@ -9,8 +9,9 @@ import retrofit2.http.Query
 
 interface ExchangeRateApi {
     @GET(BaseAPIConstants.CURRENCY_CONVERTER_URL)
-    fun getCurrencyConverterData(
-        @Path("authkey") authKey: String = BaseAPIConstants.AUTH_KEY,
+    suspend fun getCurrencyConverterData(
+        @Query("authkey") authKey: String = BaseAPIConstants.AUTH_KEY,
         @Query("searchdate") searchDate: String,
-    ): Response<ExchangeRateDTO>
+        @Query("data") data: String = "AP01"
+    ): Response<List<ExchangeRateDTO>>
 }

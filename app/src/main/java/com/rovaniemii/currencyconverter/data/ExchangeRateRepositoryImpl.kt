@@ -10,18 +10,24 @@ import kotlinx.coroutines.flow.flow
 class ExchangeRateRepositoryImpl @Inject constructor(
     private val exchangeRateApi: ExchangeRateApi,
 ) : ExchangeRateRepository {
-
-    override fun getExchangeRates(searchDate: String): Flow<Result<ExchangeRate>> = flow {
+    override fun getExchangeRates(
+        searchDate: String,
+    ): Flow<Result<List<ExchangeRate>>> = flow {
         try {
-            val response = exchangeRateApi.getCurrencyConverterData(searchDate = searchDate)
+            val response = exchangeRateApi
+                .getCurrencyConverterData(
+                    searchDate = searchDate,
+                )
 
             if (response.isSuccessful) {
                 response.body()?.let { dto ->
-                    val exchangeRate = ExchangeRate(
-                        currencyCode = dto.currencyCode,
-                        dealBaseRate = dto.dealBaseRate?.toDoubleOrNull()
-                    )
-                    emit(Result.success(exchangeRate))
+                    val exchangeRateList = dto.map {
+                        ExchangeRate(
+                            currencyCode = it.currencyCode,
+                            dealBaseRate = it.dealBaseRate?.toDoubleOrNull()
+                        )
+                    }
+                    emit(Result.success(exchangeRateList))
                 } ?: emit(Result.failure(Exception("Empty response body")))
             } else {
                 emit(Result.failure(Exception("API Error: ${response.code()}")))
